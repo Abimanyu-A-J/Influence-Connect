@@ -68,10 +68,10 @@ app.get('/api/campaign', (req, res) => {
 });
 
 app.post('/api/campaign', (req, res) => {
-  const { Name, description, Start_date, End_date, Budget, Targeted_views, Company_name} = req.body;
+  const { campaignname, company, startdate, desc, enddate, budget, targetviews } = req.body;
 
   // Insert new user into the database
-  db.query('INSERT INTO `campaign` (Name, Description, Start_date, End_date, Budget, Targeted_views, Company_name) VALUES (?, ?, ?, ?, ?, ?, ?)', [Name, description, Start_date, End_date, Budget, Targeted_views, Company_name], (err, results) => {
+  db.query('INSERT INTO `campaign` (Name, Description, Start_date, End_date, Budget, Targeted_views, Company_name) VALUES (?, ?, ?, ?, ?, ?, ?)', [campaignname, desc, startdate, enddate, budget, targetviews, company], (err, results) => {
     if (err) {
       res.status(500).json({ message: err.message });
       return;

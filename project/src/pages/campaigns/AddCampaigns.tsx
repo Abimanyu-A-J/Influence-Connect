@@ -1,8 +1,44 @@
-import React from "react";
+import React, { useState } from "react";
 import { DashboardLayout } from "../../components/dashboard/DashboardLayout";
 import { CampaignList } from "../../components/campaigns/CampaignList";
+import { useNavigate } from "react-router-dom";
 
 export function AddCampaigns() {
+  const [campaignname, setCampaignName] = useState('');
+  const [company, setCompany] = useState('');
+  const [startdate, setStartDate] = useState('');
+  const [desc, setDesc] = useState('');
+  const [enddate, setEndDate] = useState('');
+  const [budget, setBudget] = useState(0);
+  const [targetviews, setTargetviews] = useState(0);
+  const navigator = useNavigate();
+  const handleAddCampaign = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/campaign", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ campaignname, company, startdate, desc, enddate, budget, targetviews }),
+      });
+
+      if (!response.ok) {
+        console.log(response);
+      }
+
+      const data = await response.json();
+      if(data.message == "Campaign created successfully") {
+        navigator("/add-campaigns");
+      } else {
+        alert(data.message);
+      }
+      // Handle successful login (e.g., store user data, redirect, etc.)
+    } catch (error) {
+      console.error("Error during login:", error);
+      // Handle error (e.g., show error message to the user)
+    }
+  };
+
   return (
     <DashboardLayout>
       <h1 className="text-2xl font-semibold text-gray-900">Add Campaigns</h1>
@@ -14,6 +50,7 @@ export function AddCampaigns() {
             id="campaign-name"
             className="block py-2.5 px-0 w-full text-sm text-black bg-transparent border-0 border-b-2 border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-gray-500 peer"
             placeholder=""
+            onChange={(e) => setCampaignName(e.target.value)}
             required
           />
           <label
@@ -25,10 +62,11 @@ export function AddCampaigns() {
         </div>
         <div className="relative z-0 w-full mb-5 group">
           <textarea
-            name="descrpition"
+            name="descripition"
             id="campaign-descprition"
             className="block py-2.5 px-0 w-full text-sm text-black bg-transparent border-0 border-b-2 border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-gray-500 peer"
             placeholder=" "
+            onChange={(e) => setDesc(e.target.value)}
             required
           ></textarea>
           <label
@@ -44,6 +82,7 @@ export function AddCampaigns() {
             id="company-name"
             className="block py-2.5 px-0 w-full text-sm text-black bg-transparent border-0 border-b-2 border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-gray-500 peer"
             placeholder=" "
+            onChange={(e) => setCompany(e.target.value)}
             required
           />
           <label
@@ -61,6 +100,7 @@ export function AddCampaigns() {
               id="start-date"
               className="block py-2.5 px-0 w-full text-sm text-black bg-transparent border-0 border-b-2 border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-gray-500 peer"
               placeholder=" "
+              onChange={(e) => setStartDate(e.target.value)}
               required
             />
             <label
@@ -77,6 +117,7 @@ export function AddCampaigns() {
               id="end-date"
               className="block py-2.5 px-0 w-full text-sm text-black bg-transparent border-0 border-b-2 border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-gray-500 peer"
               placeholder=" "
+              onChange={(e) => setEndDate(e.target.value)}
               required
             />
             <label
@@ -89,10 +130,12 @@ export function AddCampaigns() {
         </div>
         <div className="relative z-0 w-full mb-5 group">
           <input
+            type="number"
             name="targeted-views"
             id="targeted-views"
             className="block py-2.5 px-0 w-full text-sm text-black bg-transparent border-0 border-b-2 border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-gray-500 peer"
             placeholder=" "
+            onChange={(e) => setTargetviews(e.target.value)}
             required
           />
           <label
@@ -109,6 +152,7 @@ export function AddCampaigns() {
             id="budget"
             className="block py-2.5 px-0 w-full text-sm text-black bg-transparent border-0 border-b-2 border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-gray-500 peer"
             placeholder=" "
+            onChange={(e) => setBudget(e.target.value)}
             required
           />
           <label
@@ -119,7 +163,8 @@ export function AddCampaigns() {
           </label>
         </div>
         <button
-          type="submit"
+          type="button"
+          onClick={handleAddCampaign}
           className="text-white bg-indigo-600 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
         >
           Submit
