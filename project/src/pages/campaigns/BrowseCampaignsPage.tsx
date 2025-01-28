@@ -4,6 +4,18 @@ import { CampaignList } from '../../components/campaigns/CampaignList';
 
 export function BrowseCampaignsPage() {
   // Database: Get available campaigns
+  const fetchCampaigns = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/campaign"); // Correct URL
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const campaigns = await response.json(); // Parse JSON response
+      console.log("Campaigns:", campaigns);
+    } catch (error) {
+      console.error("Error fetching campaigns:", error);
+    }
+  };
   const campaigns = []; // Replace with actual campaigns from database
 
   return (
