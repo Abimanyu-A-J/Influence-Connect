@@ -68,37 +68,48 @@ app.get('/api/campaign', (req, res) => {
 });
 
 app.post('/api/campaign', (req, res) => {
-  const { cid, Name, description, Start_date, End_date, Budget, Targeted_views, Company_name, id } = req.body;
+  const { Name, description, Start_date, End_date, Budget, Targeted_views, Company_name} = req.body;
 
   // Insert new user into the database
-  db.query('INSERT INTO `campaign` (C_id, Name, Description, Start_date, End_date, Budget, Targeted_views, Company_name, User_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [cid, Name, description, Start_date, End_date, Budget, Targeted_views, Company_name, id], (err, results) => {
+  db.query('INSERT INTO `campaign` (Name, Description, Start_date, End_date, Budget, Targeted_views, Company_name) VALUES (?, ?, ?, ?, ?, ?, ?)', [Name, description, Start_date, End_date, Budget, Targeted_views, Company_name], (err, results) => {
     if (err) {
       res.status(500).json({ message: err.message });
       return;
     }
-    res.status(201).json({ message: 'User created successfully', userId: results.insertId });
+    res.status(201).json({ message: 'Campaign created successfully', userId: results.insertId });
   });
 });
 
 app.post('/api/users', (req, res) => {
-  const {username, password, role } = req.body;
+  const { username, password, role } = req.body;
 
   // Insert new user into the database
-  db.query('INSERT INTO `login-credentials` (User_name, password, role) VALUES (?, ?, ?)', [username, password, role], (err, results) => {
-    if (err) {
-      res.status(500).json({ message: err.message });
-      return;
-    } else {
-      db.query('INSERT INTO '+role+' (User_id) VALUES (?)',[results.insertId], (err, results) => {
-        if (err) {
-          res.status(500).json({ message: err.message });
-          return;
+  db.query('INSERT INTO `login-credentials` (User_name, password, role) VALUES (?, ?, ?)', 
+    [username, password, role], 
+    (err, results) => {
+      if (err) {
+        res.status(500).json({ message: err.message });
+        return; // Prevent further execution
+      }
+
+      // Use the insertId from the first query for the second query
+      const userId = results.insertId;
+      db.query('INSERT INTO ' + role + ' (User_id,User_name) VALUES (?,?)', 
+        [userId,username], 
+        (err) => {
+          if (err) {
+            res.status(500).json({ message: err.message });
+            return; // Prevent further execution
+          }
+
+          // Send the response only after the second query is complete
+          res.status(201).json({ message: 'User created successfully', userId });
         }
-      })
-      res.status(201).json({ message: 'User created successfully', userId: results.insertId });
+      );
     }
-  });
+  );
 });
+
 
 // Start server
 app.listen(port, () => {
