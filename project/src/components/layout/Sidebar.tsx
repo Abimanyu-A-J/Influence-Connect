@@ -1,21 +1,21 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { LayoutDashboard, Users, MessageSquare, Settings } from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import { LayoutDashboard, Users, BadgePlus, Settings } from "lucide-react";
 
 interface SidebarProps {
-  userType: 'influencer' | 'sponsor';
+  userType: "influencer" | "sponsor";
 }
 
 export function Sidebar({ userType }: SidebarProps) {
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-    { 
-      icon: Users, 
-      label: userType === 'sponsor' ? 'My Campaigns' : 'Find Campaigns',
-      path: userType === 'sponsor' ? '/campaigns' : '/browse-campaigns'
+    { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
+    {
+      icon: Users,
+      label: userType === "sponsor" ? "My Campaigns" : "Find Campaigns",
+      path: userType === "sponsor" ? "/campaigns" : "/browse-campaigns",
     },
-    { icon: MessageSquare, label: 'Messages', path: '/messages' },
-    { icon: Settings, label: 'Settings', path: '/settings' },
+    { icon: BadgePlus, label: "Add Campign", path: "/add-campaigns" },
+    { icon: Settings, label: "Settings", path: "/settings" },
   ];
 
   return (
