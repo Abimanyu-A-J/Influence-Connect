@@ -1,10 +1,13 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useContext, useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Users } from 'lucide-react';
+import { useUser } from '../context/UserContext';
 
 export function Navbar() {
   // Database: Get user authentication status and profile
-  const isAuthenticated = false; // Replace with actual auth check
+  const user = useUser();
+  const isAuthenticated = Boolean(user);
+  const navigator = useNavigate();
 
   return (
     <nav className="bg-white shadow-sm">
@@ -29,6 +32,10 @@ export function Navbar() {
                 <button className="ml-4 text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
                   Sign Out
                 </button>
+                <Link 
+                to="/profile" className="ml-4 text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
+                  Profile
+                </Link>
               </>
             ) : (
               <>

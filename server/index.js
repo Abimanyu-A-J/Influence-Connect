@@ -31,7 +31,7 @@ db.connect((err) => {
 
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
-  const query = "SELECT * FROM `login-credentials` WHERE User_name = ? AND password = ?";
+  const query = "SELECT Role,User_id,User_name FROM `login-credentials` WHERE User_name = ? AND password = ?";
   db.query(query, [username, password], (err, results) => {
     if (err) {
       console.error('Error executing query', err);
@@ -39,7 +39,7 @@ app.post('/api/login', (req, res) => {
     } else if (results.length === 0) {
       res.status(401).send({ message: 'Invalid username or password' });
     } else {
-      res.send({ message: 'Login successful' });
+      res.send({ message: 'Login successful', user: results[0] });
     }
   });
 });
@@ -47,6 +47,17 @@ app.post('/api/login', (req, res) => {
 // Create API endpoint to fetch users
 app.get('/api/users', (req, res) => {
   db.query('SELECT * FROM `login-credentials`', (err, results) => {
+    if (err) {
+      res.status(500).json({ message: err });
+      return;
+    }
+    res.json(results);
+  });
+});
+
+app.post('/api/users/data', (req, res) => {
+  const { id } = req.body;
+  db.query('SELECT * FROM `login-credentials` WHERE User_id = ?', [id], (err, results) => {
     if (err) {
       res.status(500).json({ message: err });
       return;

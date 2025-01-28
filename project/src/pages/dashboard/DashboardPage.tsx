@@ -1,14 +1,28 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
+import { useUser } from '../../components/context/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 export function DashboardPage() {
   // Database: Get user type and dashboard data
   const userType = 'influencer'; // Replace with actual user type from auth
+  const { user } = useUser();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if(!user) {
+      navigate("/login");
+    }
+  })
+
+  if(!user) {
+    return null
+  }
 
   return (
-    <DashboardLayout userType={userType}>
+    <DashboardLayout userType={user.Role.toLowerCase()} user={user}>
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">Dashboard {user && user.Role}</h1>
         
         {userType === 'influencer' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

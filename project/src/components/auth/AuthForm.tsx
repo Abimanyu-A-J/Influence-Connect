@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { UserType } from '@/types';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../context/UserContext';
 
 interface AuthFormProps {
   type: 'login' | 'register';
@@ -8,8 +9,8 @@ interface AuthFormProps {
 }
 
 export function AuthForm({ type, onSubmit }: AuthFormProps) {
+  const { setUser } = useUser();
   const [username, setUsername] = useState('');
-  const [id, setid] = useState('');
   const [password, setPassword] = useState('');
   const [userType, setUserType] = useState<UserType>('influencer');
   const navigator = useNavigate();
@@ -30,6 +31,7 @@ export function AuthForm({ type, onSubmit }: AuthFormProps) {
 
       const data = await response.json();
       if(data.message == "Login successful") {
+        setUser(data.user);
         navigator("/dashboard");
       } else {
         alert(data.message);
