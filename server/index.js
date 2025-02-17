@@ -16,7 +16,7 @@ const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'project1',
+  database: 'test',
   port: 3306
 });
 
@@ -89,6 +89,50 @@ app.post('/api/campaign', (req, res) => {
     }
     res.status(201).json({ message: 'Campaign created successfully', userId: results.insertId });
   });
+});
+
+app.post('/api/campaign/filter', (req,res) => {
+  // Budget, Latest, Targeted_views, Company (Sort -> 0 ASC || 1 DESC || 2 GREATER THAN  || 3 LESSER THAN || 4 EQUAL TO || 5 GEQ || 6 LEQ)
+  const { attribute, value, sort } = req.body;
+  let query;
+  switch(sort) {
+    case 0:
+      query = `SELECT * FROM campaign ORDER BY ${attribute} ASC`
+      break;
+    case 1:
+      query = `SELECT * FROM campaign ORDER BY ${attribute} DESC`
+      break;
+    case 2:
+      query = `SELECT * FROM campaign WHERE ${attribute} > ${value}` 
+      break;
+    case 3:
+      query = `SELECT * FROM campaign WHERE ${attribute} < ${value}` 
+      break;
+    case 4:
+      query = `SELECT * FROM campaign WHERE ${attribute} = ${value}` 
+      break;
+    case 5:
+      query = `SELECT * FROM campaign WHERE ${attribute} >= ${value}` 
+      break;
+    case 6:
+      query = `SELECT * FROM campaign WHERE ${attribute} <= ${value}` 
+      break;
+    default:
+      query = "SELECT * FROM campaign"
+      break;
+  }
+
+  db.query(query, [], (err,results) => {
+    if(err) {
+      res.status(500).json({
+        message: err.message,
+      });
+      return;
+    }
+
+    res.json(results);
+  });
+
 });
 
 app.post('/api/users', (req, res) => {
