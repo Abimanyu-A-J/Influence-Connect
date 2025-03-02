@@ -16,7 +16,7 @@ export function DashboardPage() {
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const response = await fetch('http://localhost:3306/api/applications');
+        const response = await fetch('http://localhost:5000/api/application');
         if (!response.ok) throw new Error('Failed to fetch applications');
         const data = await response.json();
         setApplicationList(data);
@@ -27,7 +27,7 @@ export function DashboardPage() {
 
     const fetchCampaigns = async () => {
       try {
-        const response = await fetch('http://localhost:3306/api/campaigns');
+        const response = await fetch('http://localhost:5000/api/campaign');
         if (!response.ok) throw new Error('Failed to fetch campaigns');
         const data = await response.json();
         setCampaignList(data);
@@ -46,31 +46,6 @@ export function DashboardPage() {
     fetchData();
   }, []);
 
-  const handleFilterChange = (e) => {
-    setFilter(e.target.value);
-  };
-
-  const handleSortChange = (e) => {
-    setSortOrder(e.target.value);
-  };
-
-  const filteredApplications = applicationList.filter(app =>
-    app.name.toLowerCase().includes(filter.toLowerCase())
-  );
-
-  const filteredCampaigns = campaignList.filter(camp =>
-    camp.campaignname.toLowerCase().includes(filter.toLowerCase())
-  );
-
-  const sortedApplications = [...filteredApplications].sort((a, b) => {
-    if (sortOrder === 'asc') return a.name.localeCompare(b.name);
-    return b.name.localeCompare(a.name);
-  });
-
-  const sortedCampaigns = [...filteredCampaigns].sort((a, b) => {
-    if (sortOrder === 'asc') return a.campaignname.localeCompare(b.campaignname);
-    return b.campaignname.localeCompare(a.campaignname);
-  });
 
   const totalApplications = sortedApplications.length;
   const totalCampaigns = sortedCampaigns.length;
@@ -85,17 +60,6 @@ export function DashboardPage() {
     <DashboardLayout userType={userType}>
       <div className="space-y-6">
         <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-        <input
-          type="text"
-          placeholder="Filter..."
-          value={filter}
-          onChange={handleFilterChange}
-          className="border p-2 rounded"
-        />
-        <select value={sortOrder} onChange={handleSortChange} className="border p-2 rounded">
-          <option value="asc">Sort Ascending</option>
-          <option value="desc">Sort Descending</option>
-        </select>
         {userType === 'influencer' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -114,7 +78,7 @@ export function DashboardPage() {
               <h2 className="text-lg font-medium">Recent Campaigns</h2>
               <ul className="max-w-md divide-y divide-gray-200 dark:divide-gray-700">
                 {currentCampaigns.map((campaign) => (
-                  <ListItem key={campaign._id} item={campaign} type="campaign" />
+                  <ListItem key={campaign.C_id} item={campaign} type="campaign" />
                 ))}
               </ul>
               <div className="flex justify-between mt-4">
@@ -129,7 +93,7 @@ export function DashboardPage() {
               <h2 className="text-lg font-medium">Active Campaigns</h2>
               <ul className="max-w-md divide-y divide-gray-200 dark:divide-gray-700">
                 {currentCampaigns.map((campaign) => (
-                  <ListItem key={campaign._id} item={campaign} type="campaign" />
+                  <ListItem key={campaign.C_id} item={campaign} type="campaign" />
                 ))}
               </ul>
               <div className="flex justify-between mt-4">
