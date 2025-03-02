@@ -14,16 +14,6 @@ export function DashboardPage() {
   const [sortOrder, setSortOrder] = useState('asc');
 
   useEffect(() => {
-    const fetchApplications = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/application');
-        if (!response.ok) throw new Error('Failed to fetch applications');
-        const data = await response.json();
-        setApplicationList(data);
-      } catch (error) {
-        setError(error.message);
-      }
-    };
 
     const fetchCampaigns = async () => {
       try {
@@ -39,7 +29,7 @@ export function DashboardPage() {
 
     const fetchData = async () => {
       setLoading(true);
-      await Promise.all([fetchApplications(), fetchCampaigns()]);
+      await Promise.all([fetchCampaigns()]);
       setLoading(false);
     };
 
@@ -47,14 +37,14 @@ export function DashboardPage() {
   }, []);
 
 
-  const totalApplications = sortedApplications.length;
-  const totalCampaigns = sortedCampaigns.length;
+  const totalApplications = campaignList.length;
+  const totalCampaigns = campaignList.length;
 
-  const currentApplications = sortedApplications.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-  const currentCampaigns = sortedCampaigns.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const currentApplications = campaignList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const currentCampaigns = campaignList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   if (loading) return <DashboardLayout><h2 className='text-xl font-semibold text-gray-900'>Loading...</h2></DashboardLayout>;
- // if (error) return <DashboardLayout><h2 className='text-xl font-semibold text-gray-900'>Error: {error}</h2></DashboardLayout>;
+  // if (error) return <DashboardLayout><h2 className='text-xl font-semibold text-gray-900'>Error: {error}</h2></DashboardLayout>;
 
   return (
     <DashboardLayout userType={userType}>
