@@ -16,7 +16,7 @@ const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'project1',
+  database: 'test',
   port: 3306
 });
 
@@ -31,7 +31,7 @@ db.connect((err) => {
 
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
-  const query = "SELECT * FROM `login-credentials` WHERE User_name = ? AND password = ?";
+  const query = "SELECT Role,User_id,User_name FROM `login-credentials` WHERE User_name = ? AND password = ?";
   db.query(query, [username, password], (err, results) => {
     if (err) {
       console.error('Error executing query', err);
@@ -39,7 +39,7 @@ app.post('/api/login', (req, res) => {
     } else if (results.length === 0) {
       res.status(401).send({ message: 'Invalid username or password' });
     } else {
-      res.send({ message: 'Login successful' });
+      res.send({ message: 'Login successful', user: results[0] });
     }
   });
 });
@@ -47,6 +47,17 @@ app.post('/api/login', (req, res) => {
 // Create API endpoint to fetch users
 app.get('/api/users', (req, res) => {
   db.query('SELECT * FROM `login-credentials`', (err, results) => {
+    if (err) {
+      res.status(500).json({ message: err });
+      return;
+    }
+    res.json(results);
+  });
+});
+
+app.post('/api/users/data', (req, res) => {
+  const { id } = req.body;
+  db.query('SELECT * FROM `login-credentials` WHERE User_id = ?', [id], (err, results) => {
     if (err) {
       res.status(500).json({ message: err });
       return;
@@ -78,6 +89,50 @@ app.post('/api/campaign', (req, res) => {
     }
     res.status(201).json({ message: 'Campaign created successfully', userId: results.insertId });
   });
+});
+
+app.post('/api/campaign/filter', (req,res) => {
+  // Budget, Latest, Targeted_views, Company (Sort -> 0 ASC || 1 DESC || 2 GREATER THAN  || 3 LESSER THAN || 4 EQUAL TO || 5 GEQ || 6 LEQ)
+  const { attribute, value, sort } = req.body;
+  let query;
+  switch(sort) {
+    case 0:
+      query = `SELECT * FROM campaign ORDER BY ${attribute} ASC`
+      break;
+    case 1:
+      query = `SELECT * FROM campaign ORDER BY ${attribute} DESC`
+      break;
+    case 2:
+      query = `SELECT * FROM campaign WHERE ${attribute} > ${value}` 
+      break;
+    case 3:
+      query = `SELECT * FROM campaign WHERE ${attribute} < ${value}` 
+      break;
+    case 4:
+      query = `SELECT * FROM campaign WHERE ${attribute} = ${value}` 
+      break;
+    case 5:
+      query = `SELECT * FROM campaign WHERE ${attribute} >= ${value}` 
+      break;
+    case 6:
+      query = `SELECT * FROM campaign WHERE ${attribute} <= ${value}` 
+      break;
+    default:
+      query = "SELECT * FROM campaign"
+      break;
+  }
+
+  db.query(query, [], (err,results) => {
+    if(err) {
+      res.status(500).json({
+        message: err.message,
+      });
+      return;
+    }
+
+    res.json(results);
+  });
+
 });
 
 app.post('/api/users', (req, res) => {

@@ -9,7 +9,7 @@ export function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Adjust as needed
+  const itemsPerPage = 50; // Adjust as needed
   const [filter, setFilter] = useState('');
   const [sortOrder, setSortOrder] = useState('asc');
 
@@ -17,7 +17,7 @@ export function DashboardPage() {
 
     const fetchCampaigns = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/campaign');
+        const response = await fetch("http://localhost:5000/api/campaign");
         if (!response.ok) throw new Error('Failed to fetch campaigns');
         const data = await response.json();
         setCampaignList(data);
@@ -44,7 +44,7 @@ export function DashboardPage() {
   const currentCampaigns = campaignList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   if (loading) return <DashboardLayout><h2 className='text-xl font-semibold text-gray-900'>Loading...</h2></DashboardLayout>;
-  // if (error) return <DashboardLayout><h2 className='text-xl font-semibold text-gray-900'>Error: {error}</h2></DashboardLayout>;
+ // if (error) return <DashboardLayout><h2 className='text-xl font-semibold text-gray-900'>Error: {error}</h2></DashboardLayout>;
 
   return (
     <DashboardLayout userType={userType}>
