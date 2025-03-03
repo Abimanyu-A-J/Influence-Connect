@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
-import { CampaignList } from '../../components/campaigns/CampaignList';
-import { FilterBox } from '../../components/campaigns/FilterBox';
+import React, { useEffect, useState } from "react";
+import { DashboardLayout } from "../../components/dashboard/DashboardLayout";
+import { CampaignList } from "../../components/campaigns/CampaignList";
+import { FilterBox } from "../../components/campaigns/FilterBox";
 
 interface Campaign {
   id: string;
@@ -17,53 +17,46 @@ export function BrowseCampaignsPage() {
   const fetchAllCampaigns = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/campaign");
-      if(!response.ok) {
+      if (!response.ok) {
         alert(response.status);
+        return;
       }
       const fetched = await response.json();
       setCampaigns(fetched);
-    } catch(er) {
-      console.log(er);
-    }
-  };
-
-  const fetchCampaigns = async (filters: { budgetRange: string; sort: string; company: string }) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/campaign/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          attribute: 'budget', // Example attribute, adjust as needed
-          value: filters.budgetRange,
-          sort: filters.sort,
-        }),
-      }); // Fetch with filters
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const fetchedCampaigns = await response.json(); // Parse JSON response
-      setCampaigns(fetchedCampaigns); // Store fetched campaigns in state
-      console.log("Campaigns:", fetchedCampaigns);
     } catch (error) {
       console.error("Error fetching campaigns:", error);
     }
   };
 
+  const fetchCampaigns = async (filters: { attribute: string; sort: string; value?: string }) => {
+    try {
+      const response = await fetch("http://localhost:5000/api/campaign/filter", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(filters),
+      });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const fetchedCampaigns = await response.json();
+      setCampaigns(fetchedCampaigns);
+      console.log("Filtered Campaigns:", fetchedCampaigns);
+    } catch (error) {
+      console.error("Error fetching filtered campaigns:", error);
+    }
+  };
 
   const [filters, setFilters] = useState({
-    budgetRange: '',
-    sort: 'latest',
-    company: ''
+    attribute: "budget", // Default filter attribute
+    sort: "0", // Default sort order (Ascending)
+    value: "",
   });
 
-  const handleFilterChange = (newFilters: {
-    budgetRange: string;
-    sort: string;
-    company: string;
-  }) => {
+  const handleFilterChange = (newFilters: { attribute: string; sort: string; value?: string }) => {
     setFilters(newFilters);
     fetchCampaigns(newFilters);
   };
@@ -78,6 +71,7 @@ export function BrowseCampaignsPage() {
         <div className="flex-1 space-y-6">
           <h1 className="text-2xl font-semibold text-gray-900">Browse Campaigns</h1>
 
+          {/* Search Box */}
           <div className="bg-white p-4 rounded-lg shadow-sm">
             <input
               type="text"
@@ -86,6 +80,7 @@ export function BrowseCampaignsPage() {
             />
           </div>
 
+          {/* Campaign List */}
           <div className="bg-white grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {campaigns.map((campaign: Campaign) => (
               <div key={campaign.id} className="bg-white p-4 rounded-lg shadow-sm">
@@ -100,6 +95,7 @@ export function BrowseCampaignsPage() {
           </div>
         </div>
 
+        {/* Filter Box */}
         <div className="w-72">
           <FilterBox onFilterChange={handleFilterChange} />
         </div>

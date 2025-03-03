@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 
 interface FilterBoxProps {
-  onFilterChange: (filters: { attribute: string; sort: string; value?: string }) => void;
+  onFilterChange: (filters: { attribute: string; sort: number; value?: string }) => void;
 }
 
 export const FilterBox: React.FC<FilterBoxProps> = ({ onFilterChange }) => {
   const [attribute, setAttribute] = useState("budget"); // Default: Budget
-  const [sort, setSort] = useState("0"); // Default: Ascending
+  const [sort, setSort] = useState<number>(0); // Default: Ascending (integer)
   const [value, setValue] = useState(""); // Last input field value
 
   // Define dynamic labels and placeholders based on selected attribute
@@ -25,7 +25,7 @@ export const FilterBox: React.FC<FilterBoxProps> = ({ onFilterChange }) => {
   };
 
   const handleApplyFilters = () => {
-    const filters: { attribute: string; sort: string; value?: string } = { attribute, sort };
+    const filters: { attribute: string; sort: number; value?: string } = { attribute, sort };
 
     // Only include the value field if needed
     if (value.trim()) {
@@ -63,15 +63,15 @@ export const FilterBox: React.FC<FilterBoxProps> = ({ onFilterChange }) => {
           <select
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             value={sort}
-            onChange={(e) => setSort(e.target.value)}
+            onChange={(e) => setSort(parseInt(e.target.value, 10))}
           >
-            <option value="0">Ascending (ASC)</option>
-            <option value="1">Descending (DESC)</option>
-            <option value="2">Greater Than (GT)</option>
-            <option value="3">Lesser Than (LT)</option>
-            <option value="4">Equal To (EQ)</option>
-            <option value="5">Greater or Equal (GEQ)</option>
-            <option value="6">Lesser or Equal (LEQ)</option>
+            <option value={0}>Ascending (ASC)</option>
+            <option value={1}>Descending (DESC)</option>
+            <option value={2}>Greater Than (GT)</option>
+            <option value={3}>Lesser Than (LT)</option>
+            <option value={4}>Equal To (EQ)</option>
+            <option value={5}>Greater or Equal (GEQ)</option>
+            <option value={6}>Lesser or Equal (LEQ)</option>
           </select>
         </div>
 
