@@ -1,5 +1,5 @@
 const express = require('express');
-const mysql = require('mysql2');
+const mongoose = require('mongoose');
 const cors = require('cors');
 
 const app = express();
@@ -7,164 +7,133 @@ const port = 5000;
 
 // Enable CORS for React frontend
 app.use(cors());
-
-// Parse JSON request body
 app.use(express.json());
 
-// Set up MySQL connection
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'project',
-  port: 3306
-});
+// Connect to MongoDB
+mongoose.connect("mongodb+srv://Irjk915:IrfanIrfan@cluster0.llx9i.mongodb.net/project?retryWrites=true&w=majority&appName=Cluster0", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
-// Connect to MySQL
-db.connect((err) => {
-  if (err) {
-    console.error('Could not connect to MySQL', err);
-    return;
-  }
-  console.log('Connected to MySQL');
+// Define Mongoose Schemas & Models
+const UserSchema = new mongoose.Schema({
+  User_id: String,
+  User_name: String,
+  password: String,
+  Role: String
 });
+const User = mongoose.model('User', UserSchema, 'login-credentials');
 
-app.post('/api/login', (req, res) => {
+const CampaignSchema = new mongoose.Schema({
+  Name: String,
+  Description: String,
+  Start_date: Date,
+  End_date: Date,
+  Budget: Number,
+  Targeted_views: Number,
+  Company_name: String
+});
+const Campaign = mongoose.model('Campaign', CampaignSchema, 'campaign');
+
+// User Login
+app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
-  const query = "SELECT Role,User_id,User_name FROM `login-credentials` WHERE User_name = ? AND password = ?";
-  db.query(query, [username, password], (err, results) => {
-    if (err) {
-      console.error('Error executing query', err);
-      res.status(500).send({ message: err });
-    } else if (results.length === 0) {
-      res.status(401).send({ message: 'Invalid username or password' });
-    } else {
-      res.send({ message: 'Login successful', user: results[0] });
+  try {
+    const user = await User.findOne({ User_name: username, password });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid username or password' });
     }
-  });
-});
-
-// Create API endpoint to fetch users
-app.get('/api/users', (req, res) => {
-  db.query('SELECT * FROM `login-credentials`', (err, results) => {
-    if (err) {
-      res.status(500).json({ message: err });
-      return;
-    }
-    res.json(results);
-  });
-});
-
-app.post('/api/users/data', (req, res) => {
-  const { id } = req.body;
-  db.query('SELECT * FROM `login-credentials` WHERE User_id = ?', [id], (err, results) => {
-    if (err) {
-      res.status(500).json({ message: err });
-      return;
-    }
-    res.json(results);
-  });
-});
-
-// Create API endpoint to create a new user
-
-app.get('/api/campaign', (req, res) => {
-  db.query('SELECT * FROM `campaign`', (err, results) => {
-    if (err) {
-      res.status(500).json({ message: err });
-      return;
-    }
-    res.json(results);
-  });
-});
-
-app.post('/api/campaign', (req, res) => {
-  const { campaignname, company, startdate, desc, enddate, budget, targetviews } = req.body;
-
-  // Insert new user into the database
-  db.query('INSERT INTO `campaign` (Name, Description, Start_date, End_date, Budget, Targeted_views, Company_name) VALUES (?, ?, ?, ?, ?, ?, ?)', [campaignname, desc, startdate, enddate, budget, targetviews, company], (err, results) => {
-    if (err) {
-      res.status(500).json({ message: err.message });
-      return;
-    }
-    res.status(201).json({ message: 'Campaign created successfully', userId: results.insertId });
-  });
-});
-
-app.post('/api/campaign/filter', (req,res) => {
-  // Budget, Latest, Targeted_views, Company (Sort -> 0 ASC || 1 DESC || 2 GREATER THAN  || 3 LESSER THAN || 4 EQUAL TO || 5 GEQ || 6 LEQ)
-  const { attribute, value, sort } = req.body;
-  let query;
-  switch(sort) {
-    case 0:
-      query = `SELECT * FROM campaign ORDER BY ${attribute} ASC`
-      break;
-    case 1:
-      query = `SELECT * FROM campaign ORDER BY ${attribute} DESC`
-      break;
-    case 2:
-      query = `SELECT * FROM campaign WHERE ${attribute} > ${value}` 
-      break;
-    case 3:
-      query = `SELECT * FROM campaign WHERE ${attribute} < ${value}` 
-      break;
-    case 4:
-      query = `SELECT * FROM campaign WHERE ${attribute} = ${value}` 
-      break;
-    case 5:
-      query = `SELECT * FROM campaign WHERE ${attribute} >= ${value}` 
-      break;
-    case 6:
-      query = `SELECT * FROM campaign WHERE ${attribute} <= ${value}` 
-      break;
-    default:
-      query = "SELECT * FROM campaign"
-      break;
+    res.json({ message: 'Login successful', user });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
-
-  db.query(query, [], (err,results) => {
-    if(err) {
-      res.status(500).json({
-        message: err.message,
-      });
-      return;
-    }
-
-    res.json(results);
-  });
-
 });
 
-app.post('/api/users', (req, res) => {
+// Get All Users
+app.get('/api/users', async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get User by ID
+app.post('/api/users/data', async (req, res) => {
+  const { id } = req.body;
+  try {
+    const user = await User.findOne({ User_id: id });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get All Campaigns
+app.get('/api/campaign', async (req, res) => {
+  try {
+    const campaigns = await Campaign.find();
+    res.json(campaigns);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Create a Campaign
+app.post('/api/campaign', async (req, res) => {
+  const { campaignname, company, startdate, desc, enddate, budget, targetviews } = req.body;
+  try {
+    const campaign = new Campaign({
+      Name: campaignname,
+      Description: desc,
+      Start_date: new Date(startdate),
+      End_date: new Date(enddate),
+      Budget: budget,
+      Targeted_views: targetviews,
+      Company_name: company
+    });
+    await campaign.save();
+    res.status(201).json({ message: 'Campaign created successfully', campaign });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Filter Campaigns
+app.post('/api/campaign/filter', async (req, res) => {
+  const { attribute, value, sort } = req.body;
+  let filter = {};
+  let sortOption = {};
+
+  if (sort === 2) filter[attribute] = { $gt: value };
+  else if (sort === 3) filter[attribute] = { $lt: value };
+  else if (sort === 4) filter[attribute] = value;
+  else if (sort === 5) filter[attribute] = { $gte: value };
+  else if (sort === 6) filter[attribute] = { $lte: value };
+  else if (sort === 0) sortOption[attribute] = 1;
+  else if (sort === 1) sortOption[attribute] = -1;
+
+  try {
+    const campaigns = await Campaign.find(filter).sort(sortOption);
+    res.json(campaigns);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Create a User
+app.post('/api/users', async (req, res) => {
   const { username, password, role } = req.body;
-
-  // Insert new user into the database
-  db.query('INSERT INTO `login-credentials` (User_name, password, role) VALUES (?, ?, ?)', 
-    [username, password, role], 
-    (err, results) => {
-      if (err) {
-        res.status(500).json({ message: err.message });
-        return; // Prevent further execution
-      }
-
-      // Use the insertId from the first query for the second query
-      const userId = results.insertId;
-      db.query('INSERT INTO ' + role + ' (User_id,User_name) VALUES (?,?)', 
-        [userId,username], 
-        (err) => {
-          if (err) {
-            res.status(500).json({ message: err.message });
-            return; // Prevent further execution
-          }
-
-          // Send the response only after the second query is complete
-          res.status(201).json({ message: 'User created successfully', userId });
-        }
-      );
-    }
-  );
+  try {
+    const newUser = new User({ User_name: username, password, Role: role });
+    await newUser.save();
+    res.status(201).json({ message: 'User created successfully', userId: newUser._id });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
-
 
 // Start server
 app.listen(port, () => {

@@ -81,7 +81,7 @@ export function BrowseCampaignsPage() {
           </div>
 
           {/* Campaign List */}
-          <div className="bg-white grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="bg-gray-300 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-2 rounded-lg">
             {campaigns.map((campaign: Campaign) => (
               <div key={campaign.id} className="bg-white p-4 rounded-lg shadow-sm">
                 <h3 className="text-lg font-semibold">{campaign.Name}</h3>
