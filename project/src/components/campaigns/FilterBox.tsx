@@ -5,7 +5,7 @@ interface FilterBoxProps {
 }
 
 export const FilterBox: React.FC<FilterBoxProps> = ({ onFilterChange }) => {
-  const [attribute, setAttribute] = useState("budget"); // Default: Budget
+  const [attribute, setAttribute] = useState("Budget"); // Default: Budget
   const [sort, setSort] = useState<number>(0); // Default: Ascending (integer)
   const [value, setValue] = useState(""); // Last input field value
 
@@ -50,10 +50,10 @@ export const FilterBox: React.FC<FilterBoxProps> = ({ onFilterChange }) => {
               setValue(""); // Reset value field when changing attributes
             }}
           >
-            <option value="budget">Budget</option>
-            <option value="latest">Latest</option>
-            <option value="targeted_views">Targeted Views</option>
-            <option value="company">Company</option>
+            <option value="Budget">Budget</option>
+            <option value="Latest">Latest</option>
+            <option value="Targeted_views">Targeted Views</option>
+            <option value="Company_name">Company</option>
           </select>
         </div>
 
@@ -76,18 +76,21 @@ export const FilterBox: React.FC<FilterBoxProps> = ({ onFilterChange }) => {
         </div>
 
         {/* Dynamic Input Field (Changes Based on Attribute) */}
-        {(attribute in attributeLabels) && (
+        {(attribute.toLowerCase() in attributeLabels) && (
           <div>
-            <label className="block text-sm font-medium text-gray-700">{attributeLabels[attribute]}</label>
+            <label className="block text-sm font-medium text-gray-700">
+              {attributeLabels[attribute.toLowerCase()]}
+            </label>
             <input
               type="text"
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder={attributePlaceholders[attribute]}
+              placeholder={attributePlaceholders[attribute.toLowerCase()]}
               value={value}
               onChange={(e) => setValue(e.target.value)}
             />
           </div>
         )}
+
 
         {/* Apply Filters Button */}
         <button

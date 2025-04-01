@@ -20,12 +20,13 @@ mongoose.connect("mongodb+srv://Irjk915:IrfanIrfan@cluster0.llx9i.mongodb.net/pr
 const UserSchema = new mongoose.Schema({
   User_id: String,
   User_name: String,
-  password: String,
+  Password: String,
   Role: String
 });
 const User = mongoose.model('User', UserSchema, 'login-credentials');
 
 const CampaignSchema = new mongoose.Schema({
+  C_id: Number,
   Name: String,
   Description: String,
   Start_date: Date,
@@ -40,7 +41,7 @@ const Campaign = mongoose.model('Campaign', CampaignSchema, 'campaign');
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
   try {
-    const user = await User.findOne({ User_name: username, password });
+    const user = await User.findOne({ User_name: username, Password: password });
     if (!user) {
       return res.status(401).json({ message: 'Invalid username or password' });
     }
@@ -103,17 +104,26 @@ app.post('/api/campaign', async (req, res) => {
 
 // Filter Campaigns
 app.post('/api/campaign/filter', async (req, res) => {
-  const { attribute, value, sort } = req.body;
+  let { attribute, value, sort } = req.body;
   let filter = {};
   let sortOption = {};
 
+  // Convert Date values if applicable
+  if (["Start_date", "End_date"].includes(attribute)) {
+    value = new Date(value);
+  }
+
+  // Define filtering conditions
   if (sort === 2) filter[attribute] = { $gt: value };
   else if (sort === 3) filter[attribute] = { $lt: value };
-  else if (sort === 4) filter[attribute] = value;
+  else if (sort === 4) filter[attribute] = new RegExp(value, "i"); // Case-insensitive search
   else if (sort === 5) filter[attribute] = { $gte: value };
   else if (sort === 6) filter[attribute] = { $lte: value };
-  else if (sort === 0) sortOption[attribute] = 1;
-  else if (sort === 1) sortOption[attribute] = -1;
+  else if (sort === 0) sortOption[attribute] = 1; // Ascending
+  else if (sort === 1) sortOption[attribute] = -1; // Descending
+  else {
+    return res.status(400).json({ message: "Invalid sort value" });
+  }
 
   try {
     const campaigns = await Campaign.find(filter).sort(sortOption);
