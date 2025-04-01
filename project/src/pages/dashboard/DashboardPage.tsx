@@ -1,20 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
 import { ListItem } from './Listitem'; // Adjust the path as necessary
+import { useUser } from '../../components/context/UserContext'; // Import UserContext
+import { useNavigate } from 'react-router-dom'; // Update to useNavigate
+
+interface Application {
+  _id: string;
+  // Add other properties as needed
+}
+
+interface Campaign {
+  C_id: string;
+  // Add other properties as needed
+}
 
 export function DashboardPage() {
+  const { user } = useUser(); // Get user from context
+  const navigate = useNavigate(); // Initialize navigate for redirection
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/login'); // Redirect to login if not authenticated
+    }
+  }, [user, navigate]);
+
   const userType = 'influencer'; // Replace with actual user type from auth
-  const [applicationList, setApplicationList] = useState([]);
-  const [campaignList, setCampaignList] = useState([]);
+  const [applicationList, setApplicationList] = useState<Application[]>([]);
+  const [campaignList, setCampaignList] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50; // Adjust as needed
   const [filter, setFilter] = useState('');
   const [sortOrder, setSortOrder] = useState('asc');
 
   useEffect(() => {
-
     const fetchCampaigns = async () => {
       try {
         const response = await fetch("http://localhost:5000/api/campaign/filter");
@@ -23,7 +43,7 @@ export function DashboardPage() {
         setCampaignList(data);
         console.log(data);
       } catch (error) {
-        setError(error.message);
+        setError((error as Error).message); // Explicitly type the error
       }
     };
 
@@ -36,15 +56,14 @@ export function DashboardPage() {
     fetchData();
   }, []);
 
-
-  const totalApplications = campaignList.length;
+  const totalApplications = applicationList.length; // Corrected to use applicationList
   const totalCampaigns = campaignList.length;
 
-  const currentApplications = campaignList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const currentApplications = applicationList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage); // Corrected to use applicationList
   const currentCampaigns = campaignList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  if (loading) return <DashboardLayout><h2 className='text-xl font-semibold text-gray-900'>Loading...</h2></DashboardLayout>;
- // if (error) return <DashboardLayout><h2 className='text-xl font-semibold text-gray-900'>Error: {error}</h2></DashboardLayout>;
+  if (loading) return <DashboardLayout userType={userType}><h2 className='text-xl font-semibold text-gray-900'>Loading...</h2></DashboardLayout>;
+  // if (error) return <DashboardLayout userType={userType}><h2 className='text-xl font-semibold text-gray-900'>Error: {error}</h2></DashboardLayout>;
 
   return (
     <DashboardLayout userType={userType}>
