@@ -12,7 +12,7 @@ export function AuthForm({ type, onSubmit }: AuthFormProps) {
   const { setUser } = useUser();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [userType, setUserType] = useState<UserType>('influencer');
+  const [userType, setUserType] = useState<UserType>('Influencer');
   const navigator = useNavigate();
 
   const handleLogin = async () => {
@@ -31,6 +31,7 @@ export function AuthForm({ type, onSubmit }: AuthFormProps) {
 
       const data = await response.json();
       if(data.message == "Login successful") {
+        console.log(data.user);
         setUser(data.user);
         navigator("/dashboard");
       } else {

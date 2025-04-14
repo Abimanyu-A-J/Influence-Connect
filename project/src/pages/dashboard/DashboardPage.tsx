@@ -37,7 +37,7 @@ export function DashboardPage() {
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/campaign/filter");
+        const response = await fetch("http://localhost:5000/api/campaign");
         if (!response.ok) throw new Error('Failed to fetch campaigns');
         const data = await response.json();
         setCampaignList(data);
