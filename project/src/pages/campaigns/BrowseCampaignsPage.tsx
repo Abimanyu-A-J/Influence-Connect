@@ -4,11 +4,11 @@ import { CampaignList } from "../../components/campaigns/CampaignList";
 import { FilterBox } from "../../components/campaigns/FilterBox";
 
 interface Campaign {
-  id: string;
-  title: string;
-  company: string;
-  budget: number;
-  createdAt: string;
+  _id: string;
+  Name: string;
+  Company_name: string;
+  Budget: number;
+  Start_date: string;
 }
 
 export function BrowseCampaignsPage() {
@@ -51,8 +51,8 @@ export function BrowseCampaignsPage() {
   };
 
   const [filters, setFilters] = useState({
-    attribute: "budget", // Default filter attribute
-    sort: "0", // Default sort order (Ascending)
+    attribute: "Budget", // Use exact field name
+    sort: "0", // Ascending sort by default
     value: "",
   });
 
@@ -71,7 +71,7 @@ export function BrowseCampaignsPage() {
         <div className="flex-1 space-y-6">
           <h1 className="text-2xl font-semibold text-gray-900">Browse Campaigns</h1>
 
-          {/* Search Box */}
+          {/* Search Box (you can enhance this later) */}
           <div className="bg-white p-4 rounded-lg shadow-sm">
             <input
               type="text"
@@ -83,12 +83,12 @@ export function BrowseCampaignsPage() {
           {/* Campaign List */}
           <div className="bg-gray-300 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-2 rounded-lg">
             {campaigns.map((campaign: Campaign) => (
-              <div key={campaign.id} className="bg-white p-4 rounded-lg shadow-sm">
+              <div key={campaign._id} className="bg-white p-4 rounded-lg shadow-sm">
                 <h3 className="text-lg font-semibold">{campaign.Name}</h3>
                 <p className="text-sm text-gray-500">{campaign.Company_name}</p>
                 <p className="text-sm">Budget: ${campaign.Budget}</p>
                 <p className="text-xs text-gray-400">
-                  Posted: {new Date(campaign.Start_Date).toLocaleDateString()}
+                  Posted: {new Date(campaign.Start_date).toLocaleDateString()}
                 </p>
               </div>
             ))}
