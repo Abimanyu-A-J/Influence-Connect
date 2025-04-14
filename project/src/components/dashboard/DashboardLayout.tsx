@@ -4,7 +4,7 @@ import { Sidebar } from '../layout/Sidebar';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
-  userType: 'influencer' | 'sponsor';
+  userType: 'Influencer' | 'Sponsor';
 }
 
 export function DashboardLayout({ children, userType }: DashboardLayoutProps) {

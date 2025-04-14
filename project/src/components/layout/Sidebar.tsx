@@ -1,22 +1,24 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { LayoutDashboard, Users, BadgePlus, Settings } from "lucide-react";
+import { LayoutDashboard, BarChart2, BadgePlus, User } from "lucide-react";
 
 interface SidebarProps {
-  userType: "influencer" | "sponsor";
+  userType: "Influencer" | "Sponsor";
 }
 
 export function Sidebar({ userType }: SidebarProps) {
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
     {
-      icon: Users,
-      label: userType === "sponsor" ? "My Campaigns" : "Find Campaigns",
-      path: userType === "sponsor" ? "/campaigns" : "/browse-campaigns",
+      icon: BarChart2,
+      label: userType === "Sponsor" ? "My Campaigns" : "Find Campaigns",
+      path: userType === "Sponsor" ? "/campaigns" : "/browse-campaigns",
     },
-    { icon: BadgePlus, label: "Add Campign", path: "/add-campaigns" },
-    { icon: Settings, label: "Settings", path: "/settings" },
-  ];
+    userType === "Sponsor"
+      ? { icon: BadgePlus, label: "Add Campaign", path: "/add-campaigns" }
+      : null, // use null instead of {}
+    { icon: User, label: "Profile", path: "/profile" },
+  ].filter(Boolean); // filter out null values
 
   return (
     <div className="w-64 bg-white shadow-sm">

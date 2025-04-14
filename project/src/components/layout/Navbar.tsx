@@ -1,13 +1,17 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Users } from 'lucide-react';
 import { useUser } from '../context/UserContext';
 
 export function Navbar() {
-  // Database: Get user authentication status and profile
-  const user = useUser();
+  const { user, signOut } = useUser(); // Destructure correctly
   const isAuthenticated = Boolean(user);
-  const navigator = useNavigate();
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    signOut();
+    navigate('/'); // Redirect to home or login after sign out
+  };
 
   return (
     <nav className="bg-white shadow-sm">
@@ -29,11 +33,16 @@ export function Navbar() {
                 >
                   Dashboard
                 </Link>
-                <button className="ml-4 text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
+                <button
+                  onClick={handleSignOut}
+                  className="ml-4 text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
+                >
                   Sign Out
                 </button>
                 <Link 
-                to="/profile" className="ml-4 text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
+                  to="/profile"
+                  className="ml-4 text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
+                >
                   Profile
                 </Link>
               </>
