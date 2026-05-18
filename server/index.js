@@ -15,8 +15,9 @@ app.use(express.json());
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: 'password',
-  database: 'project1'
+  password: '',
+  database: 'test',
+  port: 3306
 });
 
 // Connect to MySQL
@@ -28,11 +29,37 @@ db.connect((err) => {
   console.log('Connected to MySQL');
 });
 
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+  const query = "SELECT Role,User_id,User_name FROM `login-credentials` WHERE User_name = ? AND password = ?";
+  db.query(query, [username, password], (err, results) => {
+    if (err) {
+      console.error('Error executing query', err);
+      res.status(500).send({ message: err });
+    } else if (results.length === 0) {
+      res.status(401).send({ message: 'Invalid username or password' });
+    } else {
+      res.send({ message: 'Login successful', user: results[0] });
+    }
+  });
+});
+
 // Create API endpoint to fetch users
 app.get('/api/users', (req, res) => {
-  db.query('SELECT * FROM login-credentials', (err, results) => {
+  db.query('SELECT * FROM `login-credentials`', (err, results) => {
     if (err) {
-      res.status(500).json({ message: 'Error retrieving data' });
+      res.status(500).json({ message: err });
+      return;
+    }
+    res.json(results);
+  });
+});
+
+app.post('/api/users/data', (req, res) => {
+  const { id } = req.body;
+  db.query('SELECT * FROM `login-credentials` WHERE User_id = ?', [id], (err, results) => {
+    if (err) {
+      res.status(500).json({ message: err });
       return;
     }
     res.json(results);
@@ -41,20 +68,103 @@ app.get('/api/users', (req, res) => {
 
 // Create API endpoint to create a new user
 
+app.get('/api/campaign', (req, res) => {
+  db.query('SELECT * FROM `campaign`', (err, results) => {
+    if (err) {
+      res.status(500).json({ message: err });
+      return;
+    }
+    res.json(results);
+  });
+});
 
-
-app.post('/api/users', (req, res) => {
-  const {User_id, username, password, role } = req.body;
+app.post('/api/campaign', (req, res) => {
+  const { campaignname, company, startdate, desc, enddate, budget, targetviews } = req.body;
 
   // Insert new user into the database
-  db.query('INSERT INTO `login-credentials` (User_id, User_name, password, role) VALUES (? ,?, ?, ?)', [User_id,username, password, role], (err, results) => {
+  db.query('INSERT INTO `campaign` (Name, Description, Start_date, End_date, Budget, Targeted_views, Company_name) VALUES (?, ?, ?, ?, ?, ?, ?)', [campaignname, desc, startdate, enddate, budget, targetviews, company], (err, results) => {
     if (err) {
       res.status(500).json({ message: err.message });
       return;
     }
-    res.status(201).json({ message: 'User created successfully', userId: results.insertId });
+    res.status(201).json({ message: 'Campaign created successfully', userId: results.insertId });
   });
 });
+
+app.post('/api/campaign/filter', (req,res) => {
+  // Budget, Latest, Targeted_views, Company (Sort -> 0 ASC || 1 DESC || 2 GREATER THAN  || 3 LESSER THAN || 4 EQUAL TO || 5 GEQ || 6 LEQ)
+  const { attribute, value, sort } = req.body;
+  let query;
+  switch(sort) {
+    case 0:
+      query = `SELECT * FROM campaign ORDER BY ${attribute} ASC`
+      break;
+    case 1:
+      query = `SELECT * FROM campaign ORDER BY ${attribute} DESC`
+      break;
+    case 2:
+      query = `SELECT * FROM campaign WHERE ${attribute} > ${value}` 
+      break;
+    case 3:
+      query = `SELECT * FROM campaign WHERE ${attribute} < ${value}` 
+      break;
+    case 4:
+      query = `SELECT * FROM campaign WHERE ${attribute} = ${value}` 
+      break;
+    case 5:
+      query = `SELECT * FROM campaign WHERE ${attribute} >= ${value}` 
+      break;
+    case 6:
+      query = `SELECT * FROM campaign WHERE ${attribute} <= ${value}` 
+      break;
+    default:
+      query = "SELECT * FROM campaign"
+      break;
+  }
+
+  db.query(query, [], (err,results) => {
+    if(err) {
+      res.status(500).json({
+        message: err.message,
+      });
+      return;
+    }
+
+    res.json(results);
+  });
+
+});
+
+app.post('/api/users', (req, res) => {
+  const { username, password, role } = req.body;
+
+  // Insert new user into the database
+  db.query('INSERT INTO `login-credentials` (User_name, password, role) VALUES (?, ?, ?)', 
+    [username, password, role], 
+    (err, results) => {
+      if (err) {
+        res.status(500).json({ message: err.message });
+        return; // Prevent further execution
+      }
+
+      // Use the insertId from the first query for the second query
+      const userId = results.insertId;
+      db.query('INSERT INTO ' + role + ' (User_id,User_name) VALUES (?,?)', 
+        [userId,username], 
+        (err) => {
+          if (err) {
+            res.status(500).json({ message: err.message });
+            return; // Prevent further execution
+          }
+
+          // Send the response only after the second query is complete
+          res.status(201).json({ message: 'User created successfully', userId });
+        }
+      );
+    }
+  );
+});
+
 
 // Start server
 app.listen(port, () => {
